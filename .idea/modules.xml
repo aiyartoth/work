@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://F:/迅雷下载/assets0.2/.idea/assets0.2.iml" filepath="F:/迅雷下载/assets0.2/.idea/assets0.2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/code.iml" filepath="$PROJECT_DIR$/.idea/code.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../test/dropload/.idea/dropload.iml" filepath="$PROJECT_DIR$/../test/dropload/.idea/dropload.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../test/iscroll/.idea/iscroll.iml" filepath="$PROJECT_DIR$/../test/iscroll/.idea/iscroll.iml" />
+    </modules>
+  </component>
+</project>
