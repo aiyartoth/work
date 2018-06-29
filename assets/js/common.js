@@ -35,39 +35,24 @@ function Common() {
     this.event_list = [];
 }
 
-Common.prototype.getSystem = function () {
-    var browser = {
-        versions: function () {
-            var u = navigator.userAgent, app = navigator.appVersion;
-            return {// 移动终端浏览器版本信息
-                trident: u.indexOf('Trident') > -1, // IE内核
-                presto: u.indexOf('Presto') > -1, // opera内核
-                webKit: u.indexOf('AppleWebKit') > -1, // 苹果、谷歌内核
-                gecko: u.indexOf('Gecko') > -1 && u.indexOf('KHTML') == -1, // 火狐内核
-                mobile: !!u.match(/AppleWebKit.*Mobile.*/)
-                || !!u.match(/AppleWebKit/), // 是否为移动终端
-                ios: !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/), // ios终端
-                android: u.indexOf('Android') > -1 || u.indexOf('Linux') > -1, // android终端或者uc浏览器
-                iPhone: u.indexOf('iPhone') > -1 || u.indexOf('Mac') > -1, // 是否为iPhone或者QQHD浏览器
-                iPad: u.indexOf('iPad') > -1, // 是否iPad
-                webApp: u.indexOf('Safari') == -1
-                // 是否web应该程序，没有头部与底部
-            };
-        }(),
-        language: (navigator.browserLanguage || navigator.language)
-            .toLowerCase()
-    }
-    if (browser.versions.ios || browser.versions.iPhone
-        || browser.versions.iPad) {
-        browser.isIos = true;
-    } else if (browser.versions.android) {
-        browser.isAndroid = true;
-    }
-    return browser;
+Common.prototype.isString = function (p) {
+    return this.getType(p) === "[object String]";
 };
 Common.prototype.isObject = function (p) {
-    return p && (typeof p === "object");
+    return this.getType(p) === "[object Object]";
 };
+Common.prototype.isNotEmptyObject = function (p) {
+    if (this.isObject(p)) {
+        var keyArr = Object.getOwnPropertyNames(p);
+        return keyArr.length > 0;
+    }
+    return false;
+};
+Common.prototype.getType = function (o) {
+    return Object.prototype.toString.call(o);
+};
+
+
 Common.prototype.isArray = function (o) {
     return Object.prototype.toString.call(o) === '[object Array]';
 };
@@ -97,7 +82,7 @@ Common.prototype.remove = function (key, fn) {
     }
     // 如果没有传入具体的回调函数，表示需要取消key对应消息的所有订阅
     if (!fn) {
-        fn && (fns.length = 0);
+        fns.length = 0;
     } else {
         for (var i = fns.length - 1; i >= 0; i--) {
             var _fn = fns[i];
@@ -146,6 +131,7 @@ Common.prototype._paramsToString = function (params) {
 
 /*loading管理*/
 function LoadingView() {
+    Common.call(this);
     this.node = $("#loading-view");
     this.env = "web";
     this.speed = 200;

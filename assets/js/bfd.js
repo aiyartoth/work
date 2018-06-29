@@ -14,7 +14,7 @@ BFD.prototype.init = function (options) {
     _BFD.USER_INFO = {
         "client_id": "sgm_onstar_pc",             //实施人员提供
         // "appkey": "87b4b263237a72d8f31969b062e3a0bc",   //实施人员提供
-        "pv_type": "0",                        //页面埋点请求方式，0为自动发送，1为手动调用
+        "pv_type": "1",                        //页面埋点请求方式，0为自动发送，1为手动调用
         "title": options.title || "",                             //当前页面标题
         "user_id": "1a2b3c"                   //用户id，如果未登录就回传空字符串
     };
@@ -23,18 +23,22 @@ BFD.prototype.init = function (options) {
         // _BFD.USER_INFO.appkey = "fb2e4f45e590518428b64a957faa30bf";
         // break;
         case "ios":
-            _BFD.USER_INFO.appkey = "";
+            // _BFD.USER_INFO.appkey = "";
             // _BFD.USER_INFO.appkey = "87b4b263237a72d8f31969b062e3a0bc";
             break;
         default:
             // delete _BFD.USER_INFO.appkey;
             // _BFD.USER_INFO.appkey = "fb2e4f45e590518428b64a957faa30bf";
-            _BFD.USER_INFO.appkey = "1d02c27669c2111e283b55fcd685166f";
+            _BFD.USER_INFO.appkey = "87b4b263237a72d8f31969b062e3a0bc";
+        // _BFD.USER_INFO.appkey = "1d02c27669c2111e283b55fcd685166f";
     }
 
-    $("#log").append("USER_INFO:<br/>"+JSON.stringify(_BFD.USER_INFO)+"<br/>");
 
     this.loadScript('/mssos/sos/recommendproxy/acquisition/web.js');
+};
+
+BFD.prototype.setAppkey = function (appkey) {
+    _BFD.USER_INFO.appkey = appkey;
 };
 /**
  * 调用推荐接口
@@ -53,7 +57,7 @@ function test_rec(data) {
 }
 
 BFD.prototype.beforeClick = function (params, actionname) {
-    actionname = actionname || "MDFeedBack";
+    actionname = actionname || "MFeedBack";
     this._BFD.UserAction(actionname, {
         "rid": params.rid,
         "item_type": params.item_type || "news",
@@ -64,16 +68,16 @@ BFD.prototype.beforeClick = function (params, actionname) {
         "terminal": params.terminal || "app"
     });
 };
-BFD.prototype.detailCount = function (params, actionname) {
+BFD.prototype.exposure = function (params, actionname) {
     actionname = actionname || "MDFeedBack";
     this._BFD.UserAction(actionname, {
-        "rid": "rec_45202d802",
-        "item_type": "news",
-        "iid": "201800321",
-        "pos_province": "四川",
-        "pos_city": "成都",
-        "car_vin": "20180032343",
-        "terminal": "app"
+        "rid": params.rid,
+        "item_type": params.item_type || "news",
+        "iid": params.iid,
+        "pos_province": params.pos_province,
+        "pos_city": params.pos_city,
+        "car_vin": params.car_vin,
+        "terminal": params.terminal || "app"
     });
 };
 BFD.prototype.addEvent = function (a, b, c) {

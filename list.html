@@ -5,11 +5,15 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="">
     <title>推荐</title>
-    <script src="assets/js/common.js"></script>
+    <script src="assets/js/common.js?v=0.0.5"></script>
     <!--<link rel="stylesheet" href="assets/css/animate.css">-->
-    <link rel="stylesheet" href="assets/css/basic.css">
-    <link rel="stylesheet" href="assets/css/list.css">
+    <link rel="stylesheet" href="assets/css/basic.css?v=0.0.5">
+    <link rel="stylesheet" href="assets/css/list.css?v=0.0.5">
+    <script>window.PointerEvent = undefined</script>
 </head>
 <body>
 <div class="wrap" id="wrap" style="display: none">
@@ -27,23 +31,34 @@
 <div id="msg-wrap" style="display: none">
     <div class="msg-view">
         <div class="msg-content-wrap">
-            <p class="msg-content"></p>
+            <p class="msg-content" id="msg-content"></p>
         </div>
-        <div class="msg-btn">朕知道了</div>
-    </div>
-</div>
-<div id="log-wrap" style="position: absolute;bottom: 0;left: 0;right: 0;height: 3rem;word-break: break-all;font-size: 12px;line-height: 1.2;background: #cccccc;z-index:999999">
-    <div id="log" style="height: 100%;overflow-y: auto">
-
+        <div class="msg-btn" id="msg-btn">朕知道了</div>
     </div>
 </div>
 
-
-<script src="assets/js/jquery.js"></script>
-<script src="assets/js/iscroll.js"></script>
-<script src="assets/js/WebViewJavascriptBridge.js"></script>
+<script src="assets/js/jquery.js?v=0.0.5"></script>
+<script src="assets/js/iscroll.js?v=0.0.5"></script>
+<script src="assets/js/WebViewJavascriptBridge.js?v=0.0.5"></script>
 <!--<script src="test/web.js"></script>-->
-<script src="assets/js/bfd.js"></script>
-<script src="assets/js/list.js"></script>
+<script src="assets/js/bfd.js?v=0.0.5"></script>
+<script>
+    var _common = new Common(),
+        rec_event_key = "rec_callback";
+
+    function rec_callback(data) {
+        _common.trigger(rec_event_key, data);
+    }
+
+
+
+</script>
+<script src="assets/js/list.js?v=0.0.5"></script>
+
+<script>
+    $(function () {
+        $("body").append("<div style='position: absolute;left: 0;top: 0;z-index: 100000;font-size: 12px;line-height: 1'>v0.0.5</div>")
+    });
+</script>
 </body>
 </html>

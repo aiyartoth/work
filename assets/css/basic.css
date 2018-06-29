@@ -33,7 +33,7 @@ footer, header, hgroup, menu, nav, section {
 }
 
 body {
-    line-height: 1;
+    /*line-height: 1;*/
 }
 
 ol, ul {
@@ -159,4 +159,12 @@ table {
     font-size: 0.32rem;
     line-height: 1rem;
     background: #107fe0;
+}
+* {
+    -webkit-backface-visibility: hidden;
+    -webkit-overflow-scrolling: touch;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-appearance: none;
+    appearance: none;
 }

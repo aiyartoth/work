@@ -28,11 +28,28 @@ html, body {
 }
 
 .view {
+    position: relative;
+    font-size: 0;
     margin-top: 0.13rem;
     overflow-x: hidden;
 }
 
+.view > p {
+    /*height: auto;*/
+    overflow: hidden;
+}
+/*.view:after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: "测试内容";
+    font-size: 12px;
+    z-index: 100;
+}*/
+
+/*
 .view > img {
     display: block;
     width: 100%;
 }
+*/
