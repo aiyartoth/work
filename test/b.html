@@ -5,15 +5,22 @@
     <title>Title</title>
 </head>
 <body>
-<script src="../assets/js/backListen.js"></script>
+<!--<script src="../assets/js/backListen.js"></script>-->
 <!--<script src="xBack.js"></script>-->
+<script src="../assets/js/common.js"></script>
 <script>
 
-    alert("b.html");
-    /*  XBack.listen(function () {
-          alert('oh! B you press the back button');
-          // window.location.href = "a.html?a=back";
-      });*/
+
+    console.log("backListen");
+    history.replaceState({}, "title", "b.html");
+    window.addEventListener("popstate", function () {
+        // alert("press")
+        var common = new Common();
+        var allParams = common.getAllParams();
+        console.log(allParams);
+        // window.location.href = "a.html";
+        // window.location.replace("a.html");
+    });
 </script>
 </body>
 </html>

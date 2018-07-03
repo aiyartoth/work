@@ -29,7 +29,7 @@ html, body {
 
 .view {
     position: relative;
-    font-size: 0;
+    font-size: 12px;
     margin-top: 0.13rem;
     overflow-x: hidden;
 }

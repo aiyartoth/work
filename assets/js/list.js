@@ -15,10 +15,14 @@ $(function () {
         this.msg_btn_node = $("#msg-btn");
         this.options = {};
         this.isAnimating = false;
+        this.recDataFile = "list_cache_data";
+        this.paramsFile = "params_cache_data";
+        this.scroll = null;
     }
 
     PageView.prototype = Object.create(Common.prototype);
     PageView.prototype.constructor = PageView;
+    //页面初始化
     PageView.prototype.init = function (options) {
         var _this = this;
         this.options = $.extend({}, this.options, options);
@@ -34,6 +38,39 @@ $(function () {
         }
     };
 
+    //页面从缓存中还原
+    PageView.prototype.revertData = function (options) {
+        var _this = this;
+        this.result.rec_data = this.getPageData(this.recDataFile);
+        this.options = $.extend({}, this.options, options);
+        if (this.result.rec_data) {
+            this.recShowHandle(this.result.rec_data);
+            this.options.complete && this.options.complete({refresh: true});//渲染完成
+            this.options.revertToLastPoi && this.options.revertToLastPoi();//还原上一次位置
+            return true;
+        }
+        this.options.complete && this.options.complete({refresh: false});
+        this.noMoreShow();
+        return false;
+
+
+    };
+    //设置页面数据缓存
+    PageView.prototype.setPageData = function (itemName, itemData) {
+        localStorage.setItem(itemName, JSON.stringify(itemData));
+    };
+    //获取页面数据缓存
+    PageView.prototype.getPageData = function (itemName) {
+        var _d = localStorage.getItem(itemName);
+        try {
+            _d = _d ? JSON.parse(_d) : "";
+        } catch (e) {
+            _d = "";
+        }
+        return _d;
+    };
+
+    //返回数据处理
     PageView.prototype.resultHandle = function (data) {
         /*var str = "";
         str += "argumentLength:" + arguments.length + "<br/>";
@@ -49,6 +86,7 @@ $(function () {
         } catch (e) {
             console.log("数据尝试转换失败......");
         }
+        //针对数据格式解析数据
         if (_this.isArray(data)) {
             //PC及IOS的数据返回[code,msg,rid,data]
             if ((data.length > 1) && (data[1] === "OK") && (data[3].length > 0)) {
@@ -62,6 +100,7 @@ $(function () {
                 resData = data.data;
             }
         }
+        //处理包含的数据
         if (resData) {
             resData.forEach(function (value) {
                 var isIn = false;
@@ -79,7 +118,8 @@ $(function () {
                 }
             });
             this.result.rec_data = this.result.rec_data.concat(_newData);
-            localStorage.setItem("rec_data", JSON.stringify(this.result.rec_data));
+            this.setPageData(this.recDataFile, this.result.rec_data);//缓存页面数据
+
             this.recShowHandle(_newData);
             this.options.complete && this.options.complete({refresh: true});
             return true;
@@ -129,26 +169,30 @@ $(function () {
         }
     };
 
+    //显示列表数据
     PageView.prototype.recShow = function (htmlStr) {
         this.no_more_wrap_node.fadeOut(200);
         this.list_node.append(htmlStr);
         this.wrap_node.fadeIn(200);
     };
+    //列表的跳转
     PageView.prototype.recAddEvent = function () {
         var _this = this;
         _this.list_node.on("click", ".item-wrap", function () {
             if (!_this.isAnimating) {
                 var index = $(this).parent().data("index");
                 var rec_data = $.extend({}, _this.options.params, _this.result.rec_data[parseInt(index)]);
-                _this.options.beforeClick && _this.options.beforeClick(rec_data);
+                _this.options.beforeClick && _this.options.beforeClick(rec_data);//检查是否有前置处理
                 var paramStr = "rid=" + (rec_data.rid || "") +
                     "&item_type=" + (rec_data.item_type || "") +
                     "&iid=" + (rec_data.iid || "") +
                     "&pos_province=" + (rec_data.pos_province || "") +
                     "&pos_city=" + (rec_data.pos_city || "") +
                     "&car_vin=" + (rec_data.car_vin || "") +
-                    "&terminal=" + (rec_data.terminal || "");
-                window.location.href = rec_data.url + "?" + paramStr;//TODO 附加参数
+                    "&terminal=" + (rec_data.terminal || "")+
+                    "&_last=list";
+                // window.location.href = rec_data.url + "?" + paramStr;//TODO 附加参数
+                window.location.replace(rec_data.url + "?" + paramStr);
             }
             return false;
 
@@ -186,14 +230,9 @@ $(function () {
             _now = new Date().getTime();
         for (var key in _cache) {
             if (_cache.hasOwnProperty(key)) {
-                if (_cache[key]["frequencyTime"] && parseInt(_cache[key]["frequencyTime"]) >= _now) {
-                    _str += key + ",";
-                } else {
-                    delete _cache[key]
-                }
+                _str += key + ",";
             }
         }
-        this.setCache(_cache);
         (_str.length > 0) && (_str = _str.substr(0, _str.length - 1));
         return _str;
     };
@@ -209,6 +248,16 @@ $(function () {
                 this.cache_data = {};
             }
         }
+        for (var key in this.cache_data) {
+            if (this.cache_data.hasOwnProperty(key)) {
+                if (this.cache_data[key]["frequencyTime"] && (parseInt(this.cache_data[key]["frequencyTime"]) >= now)) {
+                    // _str += key + ",";
+                } else {
+                    delete this.cache_data[key]
+                }
+            }
+        }
+        this.setCache(this.cache_data);
         return this.cache_data;
     };
     CacheManage.prototype.setCache = function (data) {
@@ -251,7 +300,13 @@ $(function () {
 
     //等待web.js完成的事件执行
     window.addEventListener("loadscript", function () {
-        getRec();
+        if (params["ks"]) {
+            params = page.getPageData(page.paramsFile, params);
+            revertRec();
+        } else {
+            page.setPageData(page.paramsFile, params);
+            getRec();
+        }
 
         function isPassive() {
             var supportsPassiveOption = false;
@@ -276,9 +331,7 @@ $(function () {
 
     });
 
-    //https://m-idt10.onstar.com.cn/probes/list.html?pos_city=上海市&car_vin=LSGZG5378GS026406&longitudes=121.397229546441&bid=596709208989102&idpuserid=ONSTARAPP343676152&pos_province=上海市&latitudes=31.16829291449653&appkey=87b4b263237a72d8f31969b062e3a0bc
-    //car_vin \ pos_city \ pos_province \ bid \ idpuserid \ latitudes \ longitudes \ filter_ids
-    //
+
     function getRec() {
         page.init({
             params: params,
@@ -307,9 +360,7 @@ $(function () {
                 localCache = $.extend({}, localCache, data);
                 _cache.setCache(localCache);
             },
-            beforeClick: function (params) {
-                bfd.beforeClick(params);
-            },
+            beforeClick: beforeClick,
             exposureHandle: function (params) {
                 bfd.exposure(params);
             },
@@ -359,4 +410,77 @@ $(function () {
         });
     }
 
+    function revertRec() {
+        page.revertData({
+            params: params,
+            beforeClick: beforeClick,
+            complete: function (params) {
+                _common.remove(rec_event_key);//清除事件监听
+                _loading.hide();
+                if (params && params.refresh) {
+                    if (page.scroll) {
+                        page.scroll && page.scroll.refresh();
+                    } else {
+                        page.scroll = new IScroll(page.wrap_node[0], {
+                            freeScroll: true,
+                            vScroll: true,
+                            checkDOMChanges: true,
+                            bounce: true,
+                            mouseWheel: true,
+                            click: true,
+                            deceleration: 0.001,
+                            disablePointer: true,
+                            disableTouch: false,
+                            disableMouse: false
+                        });
+
+                        page.scroll.on("scrollStart", function () {
+                            page.isAnimating = true;
+                        });
+
+                        page.scroll.on("scrollEnd", function () {
+                            page.isAnimating = false;
+                            if (this.maxScrollY === this.y) {
+                                console.log("我已滚动到底部");
+                                page._scrollTimer = page._scrollTimer || "";
+                                clearTimeout(page._scrollTimer);
+                                page._scrollTimer = setTimeout(function () {
+                                    getRec();
+                                }, 20);
+                            }
+                            return false;
+                        });
+                    }
+
+                }
+
+
+            },
+            revertToLastPoi: function () {
+                var _rh = localStorage.getItem("page_scroll");
+                if (!isNaN(+_rh)) {
+                    page.scroll && page.scroll.scrollTo(0, +_rh);
+                }
+            },
+            noData: function () {
+                page.scroll && page.scroll.destroy();
+            }
+        });
+    }
+
+    //点击处理
+    function beforeClick(params) {
+        var localCache = _cache.getCache();
+        localStorage.setItem("page_scroll", page.scroll && page.scroll.y);
+        bfd.beforeClick(params);
+        /*if (params.iid && localCache[params.iid] && (!localCache[params.iid]['isClick'])) {
+            bfd.beforeClick(params);
+            localCache[params.iid]['isClick'] = true;
+            _cache.setCache(localCache);
+        }*/
+    }
+
 });
+//https://m-idt10.onstar.com.cn/probes/list.html?pos_city=上海市&car_vin=LSGZG5378GS026406&longitudes=121.397229546441&bid=596709208989102&idpuserid=ONSTARAPP343676152&pos_province=上海市&latitudes=31.16829291449653&appkey=87b4b263237a72d8f31969b062e3a0bc
+//car_vin \ pos_city \ pos_province \ bid \ idpuserid \ latitudes \ longitudes \ filter_ids
+//https://m-idt10.onstar.com.cn/probes/show/494.html
